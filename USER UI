@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>KeettaKa GPS</title>
+    <link rel="stylesheet"
+    href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+    <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+    <style>
+        body { 
+        background-color: black; 
+        color: white;
+        margin: 0;  
+        font-family: Arial; }
+        #map { height: 85vh; }
+
+    </style>
+</head>
+<body>
+    <h1><center>KeettaKa</center></h1>
+    <p><i><center>KeettaKa is a simple GPS system for navigation featuring MapLibre's rendering engine</center></i></p>
+    <div id="map"></div>
+
+    <script>
+let start = [];
+let finish = [];
+
+        let map = new maplibregl.Map({
+            container: 'map',
+            center: start,
+            zoom: 10,
+            style: {
+                version: 8,
+                sources: {
+                    osm: {
+                        type: 'raster',
+                        tiles: [
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+                        ],
+                        tileSize: 256
+                    }
+                },
+                layers: [{
+                    id: 'osm',
+                    type: 'raster',
+                    source: 'osm'
+                }]
+            }
+        });
+                
+        // Shortest driving route
+       map.on('load', function() {
+
+    fetch(
+        'https://router.project-osrm.org/route/v1/driving/'
+        + start.join(',') + ';' + finish.join(',')
+        + '?overview=full&geometries=geojson'
+    )
+    .then(response => response.json())
+    .then(data => {
+
+        if (!data.routes || data.routes.length === 0) {
+            alert('No driving route found.');
+            return;
+        }
+
+        let route = data.routes[0];
+
+        map.addSource('line', {
+            type: 'geojson',
+            data: {
+                type: 'Feature',
+                geometry: route.geometry
+            }
+        });
+
+        map.addLayer({
+            id: 'line',
+            type: 'line',
+            source: 'line',
+            paint: {
+                'line-color': 'red',
+                'line-width': 4
+            }
+        });
+
+        new maplibregl.Marker({color: 'green'})
+            .setLngLat(start).addTo(map);
+
+        new maplibregl.Marker({color: 'red'})
+            .setLngLat(finish).addTo(map);
+
+        map.fitBounds([start, finish], {padding: 50});
+
+        alert(
+            'Driving distance: '
+            + (route.distance / 1000).toFixed(2)
+            + ' km'
+        );
+    })
+    .catch(error => {
+        alert('Could not calculate the driving route.');
+        console.log(error);
+    });
+
+});
+    </script>
+</body>
+</html>
