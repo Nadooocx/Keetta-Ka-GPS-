@@ -1,0 +1,13 @@
+File Name: KeettaKa Dijskatra's Algorithm + Graph
+
+User Records
+
+Store each KeettaKa user's name, password, and automatically
+Inputs are loaded from accounts.txt when the program starts.
+Each new ID is checked so it stays unique. Login searches the file by ID and compares the password.
+
+Shortest Route and Best Finder
+
+Keep the shortest distance, the route path, and the finder's details in each route record. The key is the start and destination IDs, and the path comes from Dijkstra's algorithm.
+When a new route is shorter than the saved one, update that record with the new distance, path, and user. This can happen after a new road is added to the graph.
+The final path is drawn on the KeettaKa map page (map.html) using MapLibre.
